@@ -1,0 +1,41 @@
+services:
+  note:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        USER_ID: ${USER_ID:-1000}
+        GROUP_ID: ${GROUP_ID:-1000}
+    container_name: note
+    command: bash script/start.sh
+    depends_on:
+      - note_db
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/app
+      - gem_cache:/usr/local/bundle
+    env_file:
+      - .env
+    networks:
+      - note_net
+
+  note_db:
+    image: "postgres:17"
+    container_name: note_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=${DATABASE_USERNAME}
+      - POSTGRES_PASSWORD=${DATABASE_USERNAME}
+    networks:
+      - note_net
+
+volumes:
+  postgres_data:
+  gem_cache:
+
+networks:
+  note_net:
